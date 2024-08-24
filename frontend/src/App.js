@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
 const App = () => {
-  const [users, setUsers] = useState([]);
+  const [tests, setTests] = useState([]);
 
   useEffect(() => {
-    fetch('/user')
+    fetch('/test')
     .then(res => res.json())
     .then(data => {
-      setUsers(data);
+      setTests([...data]);
     }).catch(err => {
       console.log(err)
     });
@@ -15,8 +15,8 @@ const App = () => {
 
   return (
     <div>
-      {users.map((user, index) =>
-        <p key={index}>{ user.name }</p>
+      {tests.map((item, index) =>
+        <p key={index}>{item.title} : {item.description}</p>
       )}
     </div>
   );

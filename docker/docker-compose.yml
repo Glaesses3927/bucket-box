@@ -26,4 +26,6 @@ services:
       - 3002:3000
     networks:
       - react_express
-    command: node index.js
+    environment:
+      CHOKIDAR_USEPOLLING: 1
+    command: bash -c "npm install && npm start"
