@@ -1,4 +1,5 @@
 import express from "express";
+import bodyParser from "body-parser";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv"; 
 import { createSSHTunnelToMySQLPort } from "./createSSHTunnelToMySQLPort.js";
@@ -11,12 +12,17 @@ const sqlUser = process.env.sqlUser;
 const sqlPassword = process.env.sqlPassword;
 const sqlDatabase = process.env.sqlDatabase;
 
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
+
 (async () => {
   try {
     await createSSHTunnelToMySQLPort();
   } catch (error) {
-    console.log("Error in SSH");
-    console.log(error);
+    console.error("[Error]: SSH");
+    console.error(error);
   }
   const pool = mysql.createPool({
     host: sqlHost,
@@ -24,6 +30,7 @@ const sqlDatabase = process.env.sqlDatabase;
     password: sqlPassword,
     database: sqlDatabase,
     namedPlaceholders: true,
+    dateStrings: 'date',
   });
   
   app.get('/test', async (req, res) => {
@@ -31,11 +38,54 @@ const sqlDatabase = process.env.sqlDatabase;
       const [result] = await pool.query(
         "SELECT * FROM test"
       );
-      res.json(result);
-    } catch (error) {
-      console.log("Error in Database");
-      console.log(error);
-      res.json({ error: "ERROR"});
+      res.status(200).json(result);
+    } catch (err) {
+      console.error("[Error]: GET");
+      console.error(err);
+      res.status(500).json({ msg: "NG", error: err });
+    }
+  });
+
+  app.post('/test', async (req, res) => {
+    try {
+      const datum = req.body;
+      await pool.query(
+        "INSERT INTO test SET :datum"
+      , { datum });
+      res.status(200).json({ msg: "OK" });
+    } catch (err) {
+      console.error("[Error]: POST");
+      console.error(err);
+      res.status(500).json({ msg: "NG", error: err });
+    }
+  });
+  
+  app.put('/test', async (req, res) => {
+    try {
+      const datum = req.body;
+      const id = datum.id;
+      await pool.query(
+        "UPDATE test SET :datum WHERE id = :id"
+      , { datum, id });
+      res.status(200).json({ msg: "OK" });
+    } catch (err) {
+      console.error("[Error]: PUT");
+      console.error(err);
+      res.status(500).json({ msg: "NG", error: err });
+    }
+  });
+  
+  app.delete('/test', async (req, res) => {
+    try {
+      const id = req.body.id;
+      await pool.query(
+        "DELETE FROM test WHERE id = :id"
+      , { id });
+      res.status(200).json({ msg: "OK" });
+    } catch (err) {
+      console.error("[Error]: DELETE");
+      console.error(err);
+      res.status(500).json({ msg: "NG", error: err });
     }
   });
   

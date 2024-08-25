@@ -14,7 +14,7 @@ services:
       - 3001:3000
     networks:
       - react_express
-    command: npm start
+    command: bash -c "npm install && npm start"
   backend:  # Express用のコンテナ
     build: .
     container_name: back
