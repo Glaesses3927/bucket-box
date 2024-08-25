@@ -24,11 +24,13 @@ app.use(cors({
 }));
 
 (async () => {
-  try {
-    await createSSHTunnelToMySQLPort();
-  } catch (error) {
-    console.error("[Error]: SSH");
-    console.error(error);
+  if(process.env.MODE==="dev"){
+    try {
+      await createSSHTunnelToMySQLPort();
+    } catch (error) {
+      console.error("[Error]: SSH");
+      console.error(error);
+    }
   }
   const pool = mysql.createPool({
     host: sqlHost,
@@ -95,5 +97,5 @@ app.use(cors({
     }
   });
   
-  app.listen(port, () => console.log(`Server running on port ${port}`));
+  app.listen(port, () => console.log(`Server running on port ${port} (${process.env.MODE})`));
 })();
