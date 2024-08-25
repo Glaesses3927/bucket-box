@@ -14,7 +14,7 @@ export default function Operation() {
   function Complete(next) {
     const newitem = structuredClone(target);
     newitem.completed = next;
-    fetch("/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)
@@ -25,7 +25,7 @@ export default function Operation() {
   }
 
   function Delete() {
-    fetch("/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({id: chosenItem})

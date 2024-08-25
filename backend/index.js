@@ -1,7 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mysql from "mysql2/promise";
-import dotenv from "dotenv"; 
+import dotenv from "dotenv";
+import cors from "cors"; 
 import { createSSHTunnelToMySQLPort } from "./createSSHTunnelToMySQLPort.js";
 
 dotenv.config();
@@ -16,6 +17,11 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
+app.use(cors({
+  origin: ['https://glaesses.net', 'http://localhost:3001'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: [ 'Content-Type' ],
+}));
 
 (async () => {
   try {
