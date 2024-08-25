@@ -1,11 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "dotenvx run -f .env.development -- nodemon index.js",
-    "prod": "dotenvx run -f .env.production -- nodemon index.js"
+    "prod": "nodemon index.js"
   },
   "keywords": [],
   "author": "",

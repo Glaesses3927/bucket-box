@@ -13,7 +13,7 @@ export default function EditCard({ item }) {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { id: item.id, title: title, description: description, due_date: due_date, location: location, url: url, completed: item.completed};
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)

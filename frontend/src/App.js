@@ -34,7 +34,7 @@ function Main() {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { title: title, description: description, due_date: due_date, location: location, url: url, completed: 0};
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)
@@ -94,7 +94,7 @@ function Container() {
 export default function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(process.env.REACT_APP_API_PATH + "/test")
+    fetch(process.env.REACT_APP_API_PATH + "/api/test")
     .then(res => res.json())
     .then(data => {
       if(!Array.isArray(data)) dispatch(setBucketList([data]));
