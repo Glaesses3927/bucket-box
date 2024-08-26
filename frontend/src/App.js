@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useAuth0 } from '@auth0/auth0-react';
 
 import AddModal from "./components/AddModal.js";
 import Header from './components/Header.js';
@@ -17,6 +18,7 @@ const thisYear = now.getFullYear();
 const thisMonth = ('0' + (now.getMonth() + 1)).slice(-2);
 const thisDay = ('0' + now.getDate()).slice(-2);
 const today = thisYear + thisMonth + thisDay;
+let token;
 
 
 function Main() {
@@ -34,24 +36,28 @@ function Main() {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { title: title, description: description, due_date: due_date, location: location, url: url, completed: 0};
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newitem)
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log('Success:', data);
-      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
-      .then(res => res.json())
-      .then(data => {
-        if(!Array.isArray(data)) dispatch(setBucketList([data]));
-        else dispatch(setBucketList(data));
-      }).catch(err => {
-        console.error(err)
-      });
-    }).catch(err => console.error('Error:', err));
-
+    (async () => {
+      try {
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
+          method: 'POST',
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(newitem)
+        })
+        let data = await res.json();
+        console.log('Success:', data);
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        data = await res.json();
+        if (Array.isArray(data)) dispatch(setBucketList(data));
+        else dispatch(setBucketList([data]));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
     dispatch(setShowAddModal(false));
   };
 
@@ -102,16 +108,22 @@ function Container() {
 }
 
 export default function App() {
+  const { getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
-    .then(res => res.json())
-    .then(data => {
-      if(!Array.isArray(data)) dispatch(setBucketList([data]));
-      else dispatch(setBucketList(data));
-    }).catch(err => {
-      console.error(err)
-    });
+    (async () => {
+      try {
+        token = await getAccessTokenSilently();
+        const res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) dispatch(setBucketList(data));
+        else dispatch(setBucketList([data]));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   });
 
   return <Container />;

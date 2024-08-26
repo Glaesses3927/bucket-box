@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 import cors from "cors"; 
 import { createSSHTunnelToMySQLPort } from "./createSSHTunnelToMySQLPort.js";
+import { auth } from "express-oauth2-jwt-bearer";
 
 dotenv.config();
 const app = express();
@@ -20,7 +21,12 @@ app.use(bodyParser.json());
 app.use(cors({
   origin: ['https://glaesses.net', 'http://localhost:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: [ 'Content-Type' ],
+  allowedHeaders: [ 'Content-Type', 'authorization' ],
+}));
+app.use( auth({
+  audience: process.env.AUTH0_AUDIENCE,
+  issuerBaseURL: process.env.AUTH0_ISSUER,
+  tokenSigningAlg: 'RS256'
 }));
 
 (async () => {
@@ -32,6 +38,7 @@ app.use(cors({
       console.error(error);
     }
   }
+
   const pool = mysql.createPool({
     host: sqlHost,
     user: sqlUser,

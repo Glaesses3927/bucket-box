@@ -1,9 +1,12 @@
 import React from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+
 import { useDispatch } from 'react-redux';
 import { setEditting } from '../store/showSlice';
 import { setBucketList } from '../store/targetSlice';
 
 export default function EditCard({ item }) {
+  const { getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
   function Edit(event) {
     event.preventDefault();
@@ -14,23 +17,30 @@ export default function EditCard({ item }) {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { id: item.id, title: title, description: description, due_date: due_date, location: location, url: url, completed: item.completed};
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newitem)
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log('Success:', data);
-      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
-      .then(res => res.json())
-      .then(data => {
-        if(!Array.isArray(data)) dispatch(setBucketList([data]));
-        else dispatch(setBucketList(data));
-      }).catch(err => {
-        console.error(err)
-      });
-    }).catch(err => console.error('Error:', err));  
+    
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
+          method: 'PUT',
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(newitem)
+        })
+        let data = await res.json();
+        console.log('Success:', data);
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        data = await res.json();
+        if (Array.isArray(data)) dispatch(setBucketList(data));
+        else dispatch(setBucketList([data]));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
     dispatch(setEditting(false));
   }
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useAuth0 } from '@auth0/auth0-react';
 
 import { setEditting } from '../store/showSlice.js';
 import { setChosenItem } from '../store/targetSlice.js';
@@ -11,48 +12,63 @@ export default function Control() {
   const chosenItem = useSelector(state => state.target.chosenItem);
   const dispatch = useDispatch();
   const target = bucketList.find(item => item.id === chosenItem);
+  const { getAccessTokenSilently } = useAuth0();
+  let token;
 
   function Complete(next) {
     const newitem = structuredClone(target);
     newitem.completed = next;
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newitem)
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log('Success:', data);
-      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
-      .then(res => res.json())
-      .then(data => {
-        if(!Array.isArray(data)) dispatch(setBucketList([data]));
-        else dispatch(setBucketList(data));
-      }).catch(err => {
-        console.error(err)
-      });
-    }).catch(err => console.error('Error:', err));    
+
+    (async () => {
+      try {
+        token = await getAccessTokenSilently();
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
+          method: 'PUT',
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(newitem)
+        })
+        let data = await res.json();
+        console.log('Success:', data);
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        data = await res.json();
+        if (Array.isArray(data)) dispatch(setBucketList(data));
+        else dispatch(setBucketList([data]));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   }
 
   function Delete() {
-    fetch(process.env.REACT_APP_API_PATH + "/test", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({id: chosenItem})
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log('Success:', data);
-      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
-      .then(res => res.json())
-      .then(data => {
-        if(!Array.isArray(data)) dispatch(setBucketList([data]));
-        else dispatch(setBucketList(data));
-      }).catch(err => {
-        console.error(err)
-      });
-    }).catch(err => console.error('Error:', err));
-
+    (async () => {
+      try {
+        token = await getAccessTokenSilently();
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
+          method: 'DELETE',
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify({id: chosenItem})
+        })
+        let data = await res.json();
+        console.log('Success:', data);
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        data = await res.json();
+        if (Array.isArray(data)) dispatch(setBucketList(data));
+        else dispatch(setBucketList([data]));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    
     dispatch(setChosenItem(-1));
   }
 
