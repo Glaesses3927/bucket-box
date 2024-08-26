@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { setEditting } from '../store/showSlice';
+import { setEditting } from '../store/showSlice.js';
 import { setChosenItem } from '../store/targetSlice.js';
+import { setBucketList } from '../store/targetSlice.js';
 
-export default function Operation() {
+export default function Control() {
   const editting = useSelector(state => state.show.editting);
   const bucketList = useSelector(state => state.target.bucketList);
   const chosenItem = useSelector(state => state.target.chosenItem);
@@ -14,32 +15,51 @@ export default function Operation() {
   function Complete(next) {
     const newitem = structuredClone(target);
     newitem.completed = next;
-    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)
     })
     .then(res => res.json())
-    .then(data => console.log('Success:', data))
-    .catch(err => console.error('Error:', err));
+    .then(data => {
+      console.log('Success:', data);
+      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
+      .then(res => res.json())
+      .then(data => {
+        if(!Array.isArray(data)) dispatch(setBucketList([data]));
+        else dispatch(setBucketList(data));
+      }).catch(err => {
+        console.error(err)
+      });
+    }).catch(err => console.error('Error:', err));    
   }
 
   function Delete() {
-    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({id: chosenItem})
     })
     .then(res => res.json())
-    .then(data => console.log('Success:', data))
-    .catch(err => console.error('Error:', err));
+    .then(data => {
+      console.log('Success:', data);
+      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
+      .then(res => res.json())
+      .then(data => {
+        if(!Array.isArray(data)) dispatch(setBucketList([data]));
+        else dispatch(setBucketList(data));
+      }).catch(err => {
+        console.error(err)
+      });
+    }).catch(err => console.error('Error:', err));
+
     dispatch(setChosenItem(-1));
   }
 
   if(!target){
     return (
       <div className="w-96 max-[480px]:w-80 p-6 bg-white border border-gray-200 rounded-lg shadow text-center">
-        Operation
+        Control
       </div>
     );
   }else if(editting) {
@@ -51,7 +71,7 @@ export default function Operation() {
       </div>
     );
   }else{
-    if(!("completed" in target)) console.log("Error in 'Operation': target has no 'comp'");
+    if(!("completed" in target)) console.log("Error in 'Control': target has no 'comp'");
     else return (
       <div className="w-96 max-[480px]:w-80 p-4 sm:p-6 bg-white border border-gray-200 rounded-lg shadow text-center">
         {target.completed===1 &&

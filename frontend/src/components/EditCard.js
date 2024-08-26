@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { setEditting } from '../store/showSlice';
+import { setBucketList } from '../store/targetSlice';
 
 export default function EditCard({ item }) {
   const dispatch = useDispatch();
@@ -13,14 +14,23 @@ export default function EditCard({ item }) {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { id: item.id, title: title, description: description, due_date: due_date, location: location, url: url, completed: item.completed};
-    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)
     })
     .then(res => res.json())
-    .then(data => console.log('Success:', data))
-    .catch(err => console.error('Error:', err));
+    .then(data => {
+      console.log('Success:', data);
+      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
+      .then(res => res.json())
+      .then(data => {
+        if(!Array.isArray(data)) dispatch(setBucketList([data]));
+        else dispatch(setBucketList(data));
+      }).catch(err => {
+        console.error(err)
+      });
+    }).catch(err => console.error('Error:', err));  
     dispatch(setEditting(false));
   }
 

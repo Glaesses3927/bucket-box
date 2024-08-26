@@ -7,7 +7,7 @@ import Header from './components/Header.js';
 import ListBucket from './components/ListBucket.js';
 import Detail from './components/Detail.js';
 import EditCard from './components/EditCard.js';
-import Operation from './components/Operation.js';
+import Control from './components/Control.js';
 
 import { setShowAddModal } from "./store/showSlice.js";
 import { setBucketList } from './store/targetSlice.js';
@@ -34,14 +34,24 @@ function Main() {
     const location = form.get("location") || "";
     const url = form.get("url") || "";
     const newitem = { title: title, description: description, due_date: due_date, location: location, url: url, completed: 0};
-    fetch(process.env.REACT_APP_API_PATH + "/api/test", {
+    fetch(process.env.REACT_APP_API_PATH + "/test", {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newitem)
     })
     .then(res => res.json())
-    .then(data => console.log('Success:', data))
-    .catch(err => console.error('Error:', err));
+    .then(data => {
+      console.log('Success:', data);
+      fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
+      .then(res => res.json())
+      .then(data => {
+        if(!Array.isArray(data)) dispatch(setBucketList([data]));
+        else dispatch(setBucketList(data));
+      }).catch(err => {
+        console.error(err)
+      });
+    }).catch(err => console.error('Error:', err));
+
     dispatch(setShowAddModal(false));
   };
 
@@ -57,7 +67,7 @@ function Main() {
               <EditCard item={bucketList.find(item => item.id === chosenItem)} />:
               <Detail item={bucketList.find(item => item.id === chosenItem)} today={today}/>
             }
-            <Operation />
+            <Control />
           </div>
         </div>
       </div>
@@ -94,7 +104,7 @@ function Container() {
 export default function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(process.env.REACT_APP_API_PATH + "/api/test")
+    fetch(process.env.REACT_APP_API_PATH + "/test?_=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       if(!Array.isArray(data)) dispatch(setBucketList([data]));
