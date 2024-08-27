@@ -44,6 +44,7 @@ export default function Control() {
         dispatch(setBucketList(data));
       } catch (err) {
         console.error(err);
+        alert(err);
       }
     })();
   }
@@ -72,6 +73,7 @@ export default function Control() {
         dispatch(setBucketList(data));
       } catch (err) {
         console.error(err);
+        alert(err);
       }
     })();
     

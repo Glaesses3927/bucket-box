@@ -45,6 +45,7 @@ export default function AddModal(){
         dispatch(setBucketList(data));
       } catch (err) {
         console.error(err);
+        alert(err);
       }
     })();
     dispatch(setShowAddModal(false));

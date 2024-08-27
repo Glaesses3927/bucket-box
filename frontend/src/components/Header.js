@@ -11,8 +11,8 @@ export default function Header() {
   const { user, isAuthenticated, isLoading } = useAuth0();
 
   const menus = [
-    { name: 'Home', href: '../../' },
-    { name: 'WebApps', href: '../' }
+    { name: 'Home', href: '.' },
+    { name: 'WebApps', href: '.' }
   ];
   const listMenus = menus.map((menu) => 
     <li className='flex sm:my-auto sm:ml-6 text-gray-900 rounded hover:bg-gray-100' key={menu.name}>
@@ -36,7 +36,7 @@ export default function Header() {
     profile = (
       <>
       <li className='flex mx-auto sm:my-auto sm:ml-6'>
-        <a className='' href='/'>
+        <a className='' href='.'>
           <img className="w-[32px] h-[32px]" src={user.picture} alt={user.name} />
         </a>
       </li>
@@ -62,7 +62,7 @@ export default function Header() {
   
   return(
     <>
-      <header className='flex p-3 pr-8 sm:pr-12 bg-white absolute top-0 w-full'>
+      <header className='flex p-3 pr-8 sm:pr-12 bg-white absolute top-0 w-full z-20'>
         <div className='flex items-center'>
           <img src={logo} className='h-12 w-12' alt='logo'></img>
           <h1 className='text-lg leading-none'>Bucket Box</h1>

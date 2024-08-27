@@ -42,6 +42,7 @@ export default function EditCard({ item }) {
         dispatch(setBucketList(data));
       } catch (err) {
         console.error(err);
+        alert(err);
       }
     })();
     dispatch(setEditting(false));
