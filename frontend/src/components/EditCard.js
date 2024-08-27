@@ -8,6 +8,7 @@ import { setBucketList } from '../store/targetSlice';
 export default function EditCard({ item }) {
   const { getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
+
   function Edit(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -16,12 +17,13 @@ export default function EditCard({ item }) {
     const due_date = form.get("due_date") || "";
     const location = form.get("location") || "";
     const url = form.get("url") || "";
-    const newitem = { id: item.id, title: title, description: description, due_date: due_date, location: location, url: url, completed: item.completed};
+    const newitem = { id: item.id, title: title, description: description, due_date: due_date, location: location, url: url, completed: item.completed, tableid: item.tableid};
     
     (async () => {
       try {
+        const fetcherr = new Error('[Error]: fetch');
         const token = await getAccessTokenSilently();
-        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
           method: 'PUT',
           headers: { 
             "Content-Type": "application/json",
@@ -29,14 +31,15 @@ export default function EditCard({ item }) {
           },
           body: JSON.stringify(newitem)
         })
+        if(!res.ok) throw fetcherr;
         let data = await res.json();
         console.log('Success:', data);
-        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if(!res.ok) throw fetcherr;
         data = await res.json();
-        if (Array.isArray(data)) dispatch(setBucketList(data));
-        else dispatch(setBucketList([data]));
+        dispatch(setBucketList(data));
       } catch (err) {
         console.error(err);
       }

@@ -40,7 +40,7 @@ export default function Header() {
           <img className="w-[32px] h-[32px]" src={user.picture} alt={user.name} />
         </a>
       </li>
-      <li className='flex mx-auto sm:my-auto sm:ml-6'>
+      <li className='flex mx-auto my-2 sm:my-auto sm:ml-6'>
         <button onClick={() => logout({ logoutParams: { returnTo: `${process.env.REACT_APP_REDIRECT_URI}` } })} className="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-4 py-2 text-center">
           LogOut
         </button>

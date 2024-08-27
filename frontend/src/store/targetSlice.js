@@ -4,17 +4,25 @@ const targetSlice = createSlice({
   name: "target",
   initialState: {
     bucketList: [],
-    chosenItem: -1,
+    bucketTable: [],
+    chosenItemId: -1,
+    chosenItemTable: "",
   },
   reducers: {
     setBucketList: (state, action) => {
       state.bucketList = action.payload;
     },
-    setChosenItem: (state, action) => {
-      state.chosenItem = action.payload;
+    setBucketTable: (state, action) => {
+      state.bucketTable = action.payload;
+    },
+    setChosenItemId: (state, action) => {
+      state.chosenItemId = action.payload;
+    },
+    setChosenItemTable: (state, action) => {
+      state.chosenItemTable = action.payload;
     },
   },
 });
 
-export const { setBucketList, setChosenItem } = targetSlice.actions;
+export const { setBucketList, setBucketTable, setChosenItemId, setChosenItemTable } = targetSlice.actions;
 export default targetSlice.reducer;

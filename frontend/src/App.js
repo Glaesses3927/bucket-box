@@ -12,6 +12,7 @@ import Control from './components/Control.js';
 
 import { setShowAddModal } from "./store/showSlice.js";
 import { setBucketList } from './store/targetSlice.js';
+import { setBucketTable } from './store/targetSlice.js';
 
 const now = new Date();
 const thisYear = now.getFullYear();
@@ -24,42 +25,9 @@ let token;
 function Main() {
   const editting = useSelector(state => state.show.editting);
   const bucketList = useSelector(state => state.target.bucketList);
-  const chosenItem = useSelector(state => state.target.chosenItem);
+  const chosenItemId = useSelector(state => state.target.chosenItemId);
+  const chosenItemTable = useSelector(state => state.target.chosenItemTable);
   const dispatch = useDispatch();
-
-  function addItem(event) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const title = form.get("title") || "";
-    const description = form.get("description") || "";
-    const due_date = form.get("due_date") || "";
-    const location = form.get("location") || "";
-    const url = form.get("url") || "";
-    const newitem = { title: title, description: description, due_date: due_date, location: location, url: url, completed: 0};
-    (async () => {
-      try {
-        let res = await fetch(process.env.REACT_APP_API_PATH + "/test", {
-          method: 'POST',
-          headers: { 
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}` 
-          },
-          body: JSON.stringify(newitem)
-        })
-        let data = await res.json();
-        console.log('Success:', data);
-        res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        data = await res.json();
-        if (Array.isArray(data)) dispatch(setBucketList(data));
-        else dispatch(setBucketList([data]));
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-    dispatch(setShowAddModal(false));
-  };
 
   return(
     <>
@@ -70,20 +38,37 @@ function Main() {
           </div>
           <div className='flex flex-col gap-2'>
             { editting ?
-              <EditCard item={bucketList.find(item => item.id === chosenItem)} />:
-              <Detail item={bucketList.find(item => item.id === chosenItem)} today={today}/>
+              <EditCard item={bucketList.find(item => (item.id === chosenItemId) && (item.tableid === chosenItemTable))} />:
+              <Detail item={bucketList.find(item => (item.id === chosenItemId) && (item.tableid === chosenItemTable))} today={today}/>
             }
             <Control />
           </div>
         </div>
       </div>
-      <AddModal addItem={addItem}/>
+      <AddModal />
       <button className='fixed bottom-8 right-4' onClick={() => dispatch(setShowAddModal(true))}>
         <svg className="w-[48px] h-[48px] text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
           <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clipRule="evenodd"/>
         </svg>
       </button>
     </>
+  );
+}
+
+function UnAuthMain({mode}) {
+  let content;
+  if(mode==="loading") {
+    content = "Loading...";
+  }
+  else if(mode==="notlogin"){
+    content = "Please LogIn using the button on the top right."
+  }
+  return(
+    <div className='flex bg-blue-100 min-h-screen pt-20 pb-6 max-[840px]:pt-28 max-[840px]:px-6'>
+      <div className='flex max-[840px]:flex-col gap-2 items-center mx-auto'>
+        {content}
+      </div>
+    </div>
   );
 }
 
@@ -98,13 +83,15 @@ function Footer() {
 }
 
 function Container() {
-  return(
-    <>
-      <Header/>
-      <Main/>
-      <Footer/>
-    </>
-  );
+  const { isAuthenticated, isLoading } = useAuth0();
+  if(isLoading) {
+    return(<><Header/><UnAuthMain mode="loading"/><Footer/></>);
+  } else if(isAuthenticated){
+    return(<><Header/><Main/><Footer/></>);
+  } else {
+    return(<><Header/><UnAuthMain mode="notlogin"/><Footer/></>);
+  }
+  
 }
 
 export default function App() {
@@ -113,18 +100,24 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
+        const fetcherr = new Error('[Error]: fetch');
         token = await getAccessTokenSilently();
-        const res = await fetch(`${process.env.REACT_APP_API_PATH}/test?_=${new Date().getTime()}`, {
+        let res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        if (Array.isArray(data)) dispatch(setBucketList(data));
-        else dispatch(setBucketList([data]));
+        if(!res.ok) throw fetcherr;
+        let data = await res.json();
+        dispatch(setBucketList(data));
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/v1/tables?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if(!res.ok) throw fetcherr;
+        data = await res.json();
+        dispatch(setBucketTable(data));
       } catch (err) {
         console.error(err);
       }
     })();
-  });
-
+  }, [dispatch, getAccessTokenSilently]);
   return <Container />;
 }

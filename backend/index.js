@@ -46,13 +46,36 @@ app.use( auth({
     database: sqlDatabase,
     namedPlaceholders: true,
     dateStrings: 'date',
+    multipleStatements: true,
   });
   
-  app.get('/test', async (req, res) => {
+  app.get('/v1', async (req, res) => {
     try {
-      const [result] = await pool.query(
-        "SELECT * FROM test"
-      );
+      const user_id = req.auth.payload.sub;
+      let [tables] = await pool.query(
+        "SELECT * FROM `User` WHERE userid = :user_id;"
+      , { user_id });
+      if(tables.length == 0){
+        const updateerr = new Error('No Row changed');
+        const newTableId = new Date().getTime().toString(16) + Math.floor(1000*Math.random()).toString(16);
+        const [result] = await pool.query(
+          `INSERT INTO \`User\` (userid, tableid) VALUES ('${user_id}', '${newTableId}');
+          CREATE TABLE \`${newTableId}\` ( id int(11) NOT NULL, title varchar(256) NOT NULL, description varchar(1024) NOT NULL, due_date date NOT NULL, location varchar(1024) NOT NULL, url varchar(1024) NOT NULL, completed tinyint(1) NOT NULL DEFAULT 0, created_at timestamp NOT NULL DEFAULT current_timestamp(), tableid varchar(64) NOT NULL DEFAULT '${newTableId}' ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+          ALTER TABLE \`${newTableId}\` ADD PRIMARY KEY (id);
+          ALTER TABLE \`${newTableId}\` MODIFY id int(11) NOT NULL AUTO_INCREMENT;
+          INSERT INTO \`TableNameId\` (tableid, tablename) VALUES ('${newTableId}', 'FirstTable');`
+        );
+        if(result.affectedRows == 0) throw updateerr; //TODO???
+        tables = [{tableid: newTableId}];
+      }
+      let result = [];
+      for (let i=0; i<tables.length; i++) {
+        const tableid = tables[i].tableid;
+        const [rows] = await pool.query(
+          `SELECT * FROM \`${tableid}\`;`
+        );
+        result.push(...rows);
+      }
       res.status(200).json(result);
     } catch (err) {
       console.error("[Error]: GET");
@@ -61,12 +84,35 @@ app.use( auth({
     }
   });
 
-  app.post('/test', async (req, res) => {
+  app.get('/v1/tables', async (req, res) => {
     try {
+      const user_id = req.auth.payload.sub;
+      const [tables] = await pool.query(
+        "SELECT * FROM `User` WHERE userid = :user_id;"
+      , { user_id });
+      const result = await Promise.all(tables.map(async item => {
+        const tableid = item.tableid;
+        const [resp] = await pool.query(
+          "SELECT * FROM `TableNameId` WHERE tableid = :tableid;"
+        , { tableid });
+        return {tableid: tableid, tablename: resp[0].tablename};
+      }));
+      res.status(200).json(result);
+    } catch (err) {
+      console.error("[Error]: GET");
+      console.error(err);
+      res.status(500).json({ msg: "NG", error: err });
+    }
+  });
+
+  app.post('/v1', async (req, res) => {
+    try {
+      const updateerr = new Error('No Row changed');
       const datum = req.body;
-      await pool.query(
-        "INSERT INTO test SET :datum"
+      const [result] = await pool.query(
+        `INSERT INTO \`${datum.tableid}\` SET :datum`
       , { datum });
+      if(result.affectedRows == 0) throw updateerr;
       res.status(200).json({ msg: "OK" });
     } catch (err) {
       console.error("[Error]: POST");
@@ -75,13 +121,15 @@ app.use( auth({
     }
   });
   
-  app.put('/test', async (req, res) => {
+  app.put('/v1', async (req, res) => {
     try {
+      const updateerr = new Error('No Row changed');
       const datum = req.body;
       const id = datum.id;
-      await pool.query(
-        "UPDATE test SET :datum WHERE id = :id"
+      const [result] = await pool.query(
+        `UPDATE \`${datum.tableid}\` SET :datum WHERE id = :id`
       , { datum, id });
+      if(result.affectedRows == 0) throw updateerr;
       res.status(200).json({ msg: "OK" });
     } catch (err) {
       console.error("[Error]: PUT");
@@ -90,12 +138,14 @@ app.use( auth({
     }
   });
   
-  app.delete('/test', async (req, res) => {
+  app.delete('/v1', async (req, res) => {
     try {
-      const id = req.body.id;
-      await pool.query(
-        "DELETE FROM test WHERE id = :id"
-      , { id });
+      const updateerr = new Error('No Row changed');
+      const datum = req.body;
+      const [result] = await pool.query(
+        `DELETE FROM \`${datum.tableid}\` WHERE id = '${datum.id}'`
+      );
+      if(result.affectedRows == 0) throw updateerr;
       res.status(200).json({ msg: "OK" });
     } catch (err) {
       console.error("[Error]: DELETE");

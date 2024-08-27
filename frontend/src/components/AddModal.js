@@ -1,10 +1,55 @@
 import React from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { setShowAddModal } from "../store/showSlice.js";
+import { setBucketList } from '../store/targetSlice.js';
 
-export default function AddModal({ addItem }){
+export default function AddModal(){
+  const { getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
   const showAddModal = useSelector(state => state.show.showAddModal);
+  const bucketTable = useSelector(state => state.target.bucketTable);
+
+  function addItem(event) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const title = form.get("title") || "";
+    const description = form.get("description") || "";
+    const due_date = form.get("due_date") || "";
+    const location = form.get("location") || "";
+    const url = form.get("url") || "";
+    const tableid = form.get("tableid") || "";
+    const newitem = { title: title, description: description, due_date: due_date, location: location, url: url, completed: 0, tableid: tableid};
+
+    (async () => {
+      try {
+        const fetcherr = new Error('[Error]: fetch');
+        const token = await getAccessTokenSilently();
+        let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
+          method: 'POST',
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(newitem)
+        })
+        if(!res.ok) throw fetcherr;
+        let data = await res.json();
+        console.log('Success:', data);
+        res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if(!res.ok) throw fetcherr;
+        data = await res.json();
+        dispatch(setBucketList(data));
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    dispatch(setShowAddModal(false));
+  };
+
   return (
     <>
       {showAddModal && 
@@ -30,10 +75,18 @@ export default function AddModal({ addItem }){
                       <input type="text" name="title" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Type Title" required="" />
                     </div>
                     <div className="col-span-2 sm:col-span-1">
-                      <label htmlFor="date" className="block mb-2 text-sm font-medium text-gray-900">Date</label>
+                      <label htmlFor="due_date" className="block mb-2 text-sm font-medium text-gray-900">Date</label>
                       <input type="date" name="due_date" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" />
                     </div>
                     <div className="col-span-2 sm:col-span-1">
+                      <label htmlFor="tableid" className="block mb-2 text-sm font-medium text-gray-900">Table</label>
+                      <select name="tableid" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        {bucketTable.map(item => 
+                          <option value={item.tableid} key={item.tableid}>{item.tablename}</option>
+                        )}
+                      </select>
+                    </div>
+                    <div className="col-span-2">
                       <label htmlFor="location" className="block mb-2 text-sm font-medium text-gray-900">Location</label>
                       <input type="text" name="location" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" placeholder="Location" />
                     </div>
@@ -43,7 +96,7 @@ export default function AddModal({ addItem }){
                     </div>
                     <div className="col-span-2">
                       <label htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900">Description</label>
-                      <textarea name="description" rows="4" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Write description here"></textarea>                    
+                      <textarea name="description" rows="2" className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Write description here"></textarea>                    
                     </div>
                   </div>
                   <button type="submit" className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
