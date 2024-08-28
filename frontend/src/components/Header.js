@@ -62,7 +62,7 @@ export default function Header() {
   
   return(
     <>
-      <header className='flex p-3 pr-8 sm:pr-12 bg-white absolute top-0 w-full z-20'>
+      <header className='flex p-3 pr-8 sm:pr-12 bg-white absolute top-0 w-full z-30'>
         <div className='flex items-center'>
           <img src={logo} className='h-12 w-12' alt='logo'></img>
           <h1 className='text-lg leading-none'>Bucket Box</h1>
@@ -71,13 +71,13 @@ export default function Header() {
           {listMenus}
           {profile}
         </ul>
-        <button onClick={() => {dispatch(setShowMenu(!showMenu))}} type="button" className="z-20 sm:hidden ml-auto my-auto inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+        <button onClick={() => {dispatch(setShowMenu(!showMenu))}} type="button" className="z-30 sm:hidden ml-auto my-auto inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
           <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15"/>
           </svg>
         </button>
       </header>
-      <ul className={showMenu ? "z-10 absolute right-0 inset-y-0 flex flex-col p-4 pt-20 border border-gray-100 rounded-lg bg-gray-50" : "hidden"}>
+      <ul className={showMenu ? "z-20 absolute right-0 inset-y-0 flex flex-col p-4 pt-20 border border-gray-100 rounded-lg bg-gray-50" : "hidden"}>
         {profile}
         {listMenus}
       </ul>
