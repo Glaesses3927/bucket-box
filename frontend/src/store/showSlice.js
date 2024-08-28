@@ -6,6 +6,7 @@ const showSlice = createSlice({
     showAddModal: false,
     showMenu: false,
     editting: false,
+    isLoading: false,
   },
   reducers: {
     setShowAddModal: (state, action) => {
@@ -17,8 +18,11 @@ const showSlice = createSlice({
     setEditting: (state, action) => {
       state.editting = action.payload;
     },
+    setIsLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
   },
 });
 
-export const { setShowAddModal, setShowMenu, setEditting } = showSlice.actions;
+export const { setShowAddModal, setShowMenu, setEditting, setIsLoading } = showSlice.actions;
 export default showSlice.reducer;

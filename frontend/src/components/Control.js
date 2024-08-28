@@ -2,10 +2,8 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuth0 } from '@auth0/auth0-react';
 
-import { setEditting } from '../store/showSlice.js';
-import { setChosenItemId } from '../store/targetSlice.js';
-import { setChosenItemTable } from '../store/targetSlice.js';
-import { setBucketList } from '../store/targetSlice.js';
+import { setEditting, setIsLoading } from '../store/showSlice.js';
+import { setBucketList, setChosenItemId, setChosenItemTable } from '../store/targetSlice.js';
 
 export default function Control() {
   const editting = useSelector(state => state.show.editting);
@@ -25,6 +23,7 @@ export default function Control() {
       try {
         const fetcherr = new Error('[Error]: fetch');
         token = await getAccessTokenSilently();
+        dispatch(setIsLoading(true));
         let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
           method: 'PUT',
           headers: { 
@@ -46,6 +45,7 @@ export default function Control() {
         console.error(err);
         alert(err);
       }
+      dispatch(setIsLoading(false));
     })();
   }
 
@@ -54,6 +54,7 @@ export default function Control() {
       try {
         const fetcherr = new Error('[Error]: fetch');
         token = await getAccessTokenSilently();
+        dispatch(setIsLoading(true));
         let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
           method: 'DELETE',
           headers: { 
@@ -75,6 +76,7 @@ export default function Control() {
         console.error(err);
         alert(err);
       }
+      dispatch(setIsLoading(false));
     })();
     
     dispatch(setChosenItemId(-1));

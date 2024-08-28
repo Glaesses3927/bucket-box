@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { setShowAddModal } from "../store/showSlice.js";
+import { setShowAddModal, setIsLoading } from "../store/showSlice.js";
 import { setBucketList } from '../store/targetSlice.js';
 
 export default function AddModal(){
@@ -26,6 +26,7 @@ export default function AddModal(){
       try {
         const fetcherr = new Error('[Error]: fetch');
         const token = await getAccessTokenSilently();
+        dispatch(setIsLoading(true));
         let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
           method: 'POST',
           headers: { 
@@ -47,6 +48,7 @@ export default function AddModal(){
         console.error(err);
         alert(err);
       }
+      dispatch(setIsLoading(false));
     })();
     dispatch(setShowAddModal(false));
   };

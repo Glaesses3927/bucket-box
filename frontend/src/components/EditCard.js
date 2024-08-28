@@ -2,8 +2,8 @@ import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 import { useDispatch } from 'react-redux';
-import { setEditting } from '../store/showSlice';
-import { setBucketList } from '../store/targetSlice';
+import { setEditting, setIsLoading } from '../store/showSlice.js';
+import { setBucketList } from '../store/targetSlice.js';
 
 export default function EditCard({ item }) {
   const { getAccessTokenSilently } = useAuth0();
@@ -23,6 +23,7 @@ export default function EditCard({ item }) {
       try {
         const fetcherr = new Error('[Error]: fetch');
         const token = await getAccessTokenSilently();
+        dispatch(setIsLoading(true));
         let res = await fetch(process.env.REACT_APP_API_PATH + "/v1", {
           method: 'PUT',
           headers: { 
@@ -44,6 +45,7 @@ export default function EditCard({ item }) {
         console.error(err);
         alert(err);
       }
+      dispatch(setIsLoading(false));
     })();
     dispatch(setEditting(false));
   }

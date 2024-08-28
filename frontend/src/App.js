@@ -10,15 +10,15 @@ import Detail from './components/Detail.js';
 import EditCard from './components/EditCard.js';
 import Control from './components/Control.js';
 
-import { setShowAddModal } from "./store/showSlice.js";
-import { setBucketList } from './store/targetSlice.js';
-import { setBucketTable } from './store/targetSlice.js';
+import { setShowAddModal, setIsLoading } from "./store/showSlice.js";
+import { setBucketList, setBucketTable } from './store/targetSlice.js';
 
 import logo_react from './logo_react.svg';
 import logo_redux from './logo_redux.svg';
 import logo_tailwind from './logo_tailwindcss.svg';
 import logo_auth0 from './logo_auth0.svg';
 import logo_nodejs from './logo_nodejs.svg';
+import logo_flowbite from './logo_flowbite.svg';
 
 const now = new Date();
 const thisYear = now.getFullYear();
@@ -40,6 +40,7 @@ function Main() {
     try {
       const fetcherr = new Error('[Error]: fetch');
       token = await getAccessTokenSilently();
+      dispatch(setIsLoading(true));
       let res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -56,6 +57,7 @@ function Main() {
       console.error(err);
       alert(err);
     }
+    dispatch(setIsLoading(false));
   }
 
   return(
@@ -74,11 +76,12 @@ function Main() {
           </div>
         </div>
         <div className='flex absolute gap-4 bottom-8 max-[840px]:bottom-4 inset-x-0 justify-center'>
-          <img src={logo_react} className='h-8 w-8' alt='logo'></img>
-          <img src={logo_redux} className='h-8 w-8' alt='logo'></img>
-          <img src={logo_tailwind} className='h-8 w-8' alt='logo'></img>
-          <img src={logo_auth0} className='h-8 w-8' alt='logo'></img>
-          <img src={logo_nodejs} className='h-8 w-8' alt='logo'></img>
+          <img src={logo_react} className='h-8 w-8' alt='reactlogo'></img>
+          <img src={logo_redux} className='h-8 w-8' alt='reduxlogo'></img>
+          <img src={logo_tailwind} className='h-8 w-8' alt='tailwindcsslogo'></img>
+          <img src={logo_flowbite} className='h-8 w-8' alt='flowbitelogo'></img>
+          <img src={logo_auth0} className='h-8 w-8' alt='auth0logo'></img>
+          <img src={logo_nodejs} className='h-8 w-8' alt='nodejslogo'></img>
         </div>
       </div>
       <AddModal />
@@ -138,30 +141,34 @@ function Container() {
 }
 
 export default function App() {
-  const { getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       try {
-        const fetcherr = new Error('[Error]: fetch');
-        token = await getAccessTokenSilently();
-        let res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if(!res.ok) throw fetcherr;
-        let data = await res.json();
-        dispatch(setBucketList(data));
-        res = await fetch(`${process.env.REACT_APP_API_PATH}/v1/tables?_=${new Date().getTime()}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if(!res.ok) throw fetcherr;
-        data = await res.json();
-        dispatch(setBucketTable(data));
+        if(isAuthenticated) {
+          const fetcherr = new Error('[Error]: fetch');
+          token = await getAccessTokenSilently();
+          dispatch(setIsLoading(true));
+          let res = await fetch(`${process.env.REACT_APP_API_PATH}/v1?_=${new Date().getTime()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if(!res.ok) throw fetcherr;
+          let data = await res.json();
+          dispatch(setBucketList(data));
+          res = await fetch(`${process.env.REACT_APP_API_PATH}/v1/tables?_=${new Date().getTime()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if(!res.ok) throw fetcherr;
+          data = await res.json();
+          dispatch(setBucketTable(data));
+        }
       } catch (err) {
         console.error(err);
         alert(err);
       }
+      dispatch(setIsLoading(false));
     })();
-  }, [dispatch, getAccessTokenSilently]);
+  }, [dispatch, getAccessTokenSilently, isAuthenticated]);
   return <Container />;
 }
