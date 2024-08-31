@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../logo.svg';
+import logo from '../lib/logo.svg';
 import { useSelector, useDispatch } from 'react-redux';
 import { setShowMenu } from "../store/showSlice.js";
 import { useAuth0 } from '@auth0/auth0-react';

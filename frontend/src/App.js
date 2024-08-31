@@ -13,12 +13,12 @@ import Control from './components/Control.js';
 import { setShowAddModal, setIsLoading } from "./store/showSlice.js";
 import { setBucketList, setBucketTable } from './store/targetSlice.js';
 
-import logo_react from './logo_react.svg';
-import logo_redux from './logo_redux.svg';
-import logo_tailwind from './logo_tailwindcss.svg';
-import logo_auth0 from './logo_auth0.svg';
-import logo_nodejs from './logo_nodejs.svg';
-import logo_flowbite from './logo_flowbite.svg';
+import logo_react from './lib/logo_react.svg';
+import logo_redux from './lib/logo_redux.svg';
+import logo_tailwind from './lib/logo_tailwindcss.svg';
+import logo_auth0 from './lib/logo_auth0.svg';
+import logo_nodejs from './lib/logo_nodejs.svg';
+import logo_flowbite from './lib/logo_flowbite.svg';
 import back_video from './lib/mixkit-blonde-woman-reading-a-book-4948-hd-ready.mp4';
 import illust_forgot from './lib/illust_forgot.svg';
 import illust_share from './lib/illust_share.svg';
