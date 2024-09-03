@@ -11,12 +11,12 @@ export default function Header() {
   const { user, isAuthenticated, isLoading } = useAuth0();
 
   const menus = [
-    { name: 'Home', href: '.' },
-    { name: 'WebApps', href: '.' }
+    { name: 'Home', href: 'https://glaesses.net/home' },
+    { name: 'WebApps', href: 'https://glaesses.net/home/webapps.html' }
   ];
   const listMenus = menus.map((menu) => 
     <li className='flex sm:my-auto sm:ml-6 text-gray-900 rounded hover:bg-gray-100' key={menu.name}>
-      <a className='p-2 w-full text-center' href={menu.href}>
+      <a className='p-2 pl-6 sm:pl-2 w-full sm:text-center' href={menu.href}>
         {menu.name}
       </a>
     </li>
@@ -32,7 +32,6 @@ export default function Header() {
       </li>
     );
   } else if(isAuthenticated) {
-    console.log(user);
     profile = (
       <>
       <li className='flex mx-auto sm:my-auto sm:ml-6'>
@@ -62,7 +61,7 @@ export default function Header() {
   
   return(
     <>
-      <header className='flex p-3 pr-8 sm:pr-12 bg-white absolute top-0 w-full z-30'>
+      <header className='flex p-3 pr-8 sm:pr-12 bg-white fixed top-0 w-full z-30 shadow'>
         <div className='flex items-center'>
           <img src={logo} className='h-12 w-12' alt='logo'></img>
           <h1 className='text-lg leading-none'>Bucket Box</h1>
@@ -77,9 +76,13 @@ export default function Header() {
           </svg>
         </button>
       </header>
-      <ul className={showMenu ? "z-20 absolute right-0 inset-y-0 flex flex-col p-4 pt-20 border border-gray-100 rounded-lg bg-gray-50" : "hidden"}>
-        {profile}
+      <div onClick={() => {dispatch(setShowMenu(false))}} className={showMenu ? "fixed top-0 left-0 w-screen h-screen bg-[rgb(0,0,0,0.5)] z-20" : "hidden"}/>
+      <ul className={showMenu ? "z-20 fixed right-0 inset-y-0 flex flex-col gap-2 p-4 pt-28 w-4/5 bg-gray-50 text-xl font-semibold" : "hidden"}>
         {listMenus}
+        <li>
+          <hr class="w-4/5 h-[2px] mx-auto my-4 bg-gray-200 border-0 rounded" />
+        </li>
+        {profile}
       </ul>
     </>
   )
