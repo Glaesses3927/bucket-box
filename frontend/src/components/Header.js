@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../lib/logo.svg';
+import logo from '../lib/logo.png';
 import { useSelector, useDispatch } from 'react-redux';
 import { setShowMenu } from "../store/showSlice.js";
 import { useAuth0 } from '@auth0/auth0-react';
@@ -12,7 +12,7 @@ export default function Header() {
 
   const menus = [
     { name: 'Home', href: 'https://glaesses.net/home' },
-    { name: 'WebApps', href: 'https://glaesses.net/home/webapps.html' }
+    { name: 'WebApps', href: 'https://glaesses.net/home/webapp.html' }
   ];
   const listMenus = menus.map((menu) => 
     <li className='flex sm:my-auto sm:ml-6 text-gray-900 rounded hover:bg-gray-100' key={menu.name}>
