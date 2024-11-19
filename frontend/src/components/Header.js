@@ -12,7 +12,7 @@ export default function Header() {
 
   const menus = [
     { name: 'Home', href: 'https://glaesses.net/home' },
-    { name: 'WebApps', href: 'https://glaesses.net/home/webapp.html' }
+    { name: 'WebApps', href: 'https://glaesses.net/home/webapps.html' }
   ];
   const listMenus = menus.map((menu) => 
     <li className='flex sm:my-auto sm:ml-6 text-gray-900 rounded hover:bg-gray-100' key={menu.name}>
@@ -64,7 +64,7 @@ export default function Header() {
       <header className='flex p-3 pr-8 sm:pr-12 bg-white fixed top-0 w-full z-30 shadow'>
         <div className='flex items-center'>
           <img src={logo} className='h-12 w-12' alt='logo'></img>
-          <h1 className='text-lg leading-none'>Bucket Box</h1>
+          <h1 className='text-xl font-bold leading-none'>BucketBox</h1>
         </div>
         <ul className='max-[640px]:hidden flex ml-auto'>
           {listMenus}

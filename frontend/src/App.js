@@ -276,6 +276,20 @@ export default function App() {
       }
       dispatch(setIsLoading(false));
     })();
+
+    const head = document.getElementsByTagName('head')[0];
+    const scriptUrl1 = document.createElement('script');
+    const scriptUrl2 = document.createElement('script');
+    scriptUrl1.async = true;
+    scriptUrl1.src = `https://www.googletagmanager.com/gtag/js?id=${process.env.REACT_APP_GTAG}`;
+    scriptUrl2.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '${process.env.REACT_APP_GTAG}');`;
+    head.appendChild(scriptUrl1);
+    head.appendChild(scriptUrl2);
   }, [dispatch, getAccessTokenSilently, isAuthenticated]);
   return <Container />;
 }
