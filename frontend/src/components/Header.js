@@ -12,7 +12,7 @@ export default function Header() {
 
   const menus = [
     { name: 'Home', href: 'https://glaesses.net/home' },
-    { name: 'WebApps', href: 'https://glaesses.net/home/webapps.html' }
+    { name: 'WebApps', href: 'https://glaesses.net/home/webapps' }
   ];
   const listMenus = menus.map((menu) => 
     <li className='flex sm:my-auto sm:ml-6 text-gray-900 rounded hover:bg-gray-100' key={menu.name}>
